@@ -1,0 +1,16 @@
+<div class="space-y-8">
+  <div class="bg-cyan-600/20 border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center">
+    <h1 class="text-white text-5xl font-black italic">Antarctique</h1>
+    <p class="text-cyan-200/60 mt-4">Terres australes et zones de recherche</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    @for (p of pagedPaysAntarctic(); track p.cca3) {
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+        <img [src]="p.flags.svg" class="w-full h-24 object-contain mb-4 opacity-80" alt="drapeau">
+        <h3 class="text-white font-bold text-center">{{ p.name.common }}</h3>
+        <p class="text-center text-cyan-400 text-xs mt-2 font-mono">{{ ws.formatPopulation(p.area ?? 0) }} km²</p>
+      </div>
+    }
+  </div>
+</div>

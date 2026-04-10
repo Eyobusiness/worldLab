@@ -1,0 +1,233 @@
+<header
+  class="fixed top-0 left-0 right-0 z-50 h-16
+         bg-[#0d1b2a] border-b border-white/10
+         flex items-center justify-between px-4 gap-3
+         shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
+
+  <div class="flex items-center gap-3 min-w-0">
+
+    <button
+      title="Ouvrir/Fermer le menu"
+      (click)="theme.toggleSidebar()"
+      class="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
+             hover:bg-white/10 active:scale-95 transition-all duration-200 group">
+      <svg class="w-6 h-6 text-white/70 group-hover:text-[#f0a500] transition-colors duration-200"
+           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M4 6h16M4 12h16m-7 6h7"/>
+      </svg>
+    </button>
+
+    <a routerLink="/dashboard" class="flex items-center gap-2 min-w-0">
+      <div class="w-9 h-9 shrink-0 rounded-xl bg-linear-to-br from-[#f0a500] to-[#e07b00]
+                  flex items-center justify-center shadow-lg shadow-[#f0a500]/30">
+        <svg class="w-5 h-5 text-[#0d1b2a]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1
+                   17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2
+                   2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2
+                   c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41
+                   0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+      </div>
+      <div class="hidden sm:block">
+        <p class="text-[#f0a500] font-black text-base leading-none tracking-wide">WorldLab</p>
+        <p class="text-white/40 text-[10px] tracking-[0.2em] uppercase font-medium">Explorer</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="hidden md:flex flex-1 max-w-xl mx-4 relative">
+    <div class="relative w-full">
+      <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+        <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+      <input
+        type="text"
+        [value]="worldService.searchTerm()"
+        (input)="onSearchChange($event)"
+        placeholder="Chercher un pays (ex: CI, France)..."
+        class="w-full pl-10 pr-4 py-2.5 rounded-xl
+               bg-white/8 border border-white/12
+               text-white/80 placeholder-white/35 text-sm
+               focus:outline-none focus:border-[#f0a500]/50 focus:bg-white/12
+               transition-all duration-200"/>
+    </div>
+
+    @if (worldService.searchResults().length > 0) {
+      <div class="absolute top-full left-0 right-0 mt-2 bg-[#0d1b2a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-60">
+        @for (p of worldService.searchResults(); track p.cca3) {
+          <button (click)="goToDetails(p.cca3)"
+                  class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-0">
+            <img [src]="p.flags.svg" class="w-6 h-4 object-cover rounded-sm" alt="drapeau">
+            <span class="text-white text-sm font-medium">{{ p.name.common }}</span>
+            <span class="text-white/40 text-xs ml-auto">{{ p.region }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="flex items-center gap-1.5 shrink-0">
+
+    <button
+      id="search-btn"
+      title="Rechercher"
+      (click)="toggleSearch()"
+      class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center
+             hover:bg-white/10 transition-colors duration-200">
+      <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </button>
+
+    <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                bg-white/8 border border-white/12 cursor-default select-none">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]"></span>
+      <span class="text-white/70 text-xs font-medium">API active</span>
+    </div>
+
+    <button
+      title="Changer le thème"
+      (click)="theme.toggleTheme()"
+      class="w-9 h-9 rounded-lg flex items-center justify-center
+             hover:bg-white/10 transition-colors duration-200 group">
+      <svg *ngIf="!theme.isDark()" class="w-5 h-5 text-[#f0a500]" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 7a5 5 0 100 10A5 5 0 0012 7zm0-5a1 1 0 011 1v2a1 1 0 01-2 0V3a1 1 0
+                 011-1zm0 16a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zM4.22 4.22a1 1 0
+                 011.42 0l1.41 1.41a1 1 0 01-1.41 1.42L4.22 5.64a1 1 0 010-1.42z"/>
+      </svg>
+      <svg *ngIf="theme.isDark()"
+           class="w-5 h-5 text-white/60 group-hover:text-[#f0a500] transition-colors"
+           fill="currentColor" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+      </svg>
+    </button>
+
+    <div class="relative">
+      <button
+        id="profile-btn"
+        (click)="toggleProfile()"
+        class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl
+               hover:bg-white/10 transition-colors duration-200 group">
+        <div class="w-8 h-8 rounded-full bg-linear-to-br from-[#f0a500] to-[#c47d00]
+                    flex items-center justify-center font-bold text-[#0d1b2a] text-sm
+                    ring-2 ring-[#f0a500]/40 shrink-0">
+          {{ initials }}
+        </div>
+        <span class="hidden sm:block text-white/70 text-sm font-medium group-hover:text-white transition-colors">
+          {{ displayName }}
+        </span>
+        <svg class="hidden sm:block w-4 h-4 text-white/40 transition-transform duration-200"
+             [class.rotate-180]="profileOpen()"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div
+        id="profile-menu"
+        *ngIf="profileOpen()"
+        class="absolute right-0 top-full mt-2 w-56 z-50
+               bg-[#0d1b2a] border border-white/12 rounded-2xl
+               shadow-[0_8px_40px_rgba(0,0,0,0.5)] overflow-hidden
+               animate-[fadeIn_0.15s_ease]">
+
+        <div class="px-4 py-3 border-b border-white/10">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-linear-to-br from-[#f0a500] to-[#c47d00]
+                        flex items-center justify-center font-bold text-[#0d1b2a] shrink-0">{{ initials }} </div>
+            <div class="min-w-0">
+              <p class="text-white font-semibold text-sm truncate">{{ displayName }} </p>
+              <p class="text-white/40 text-xs truncate">{{ displayEmail }}</p>
+            </div>
+          </div>
+        </div>
+
+        <ul class="py-2">
+          <li>
+            <button
+              (click)="theme.toggleTheme(); closeProfile()"
+              class="w-full flex items-center justify-between gap-3 px-4 py-2.5
+                     text-white/70 hover:text-white hover:bg-white/8 transition-all text-sm">
+              <div class="flex items-center gap-3">
+                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path *ngIf="theme.isDark()"
+                        d="M12 7a5 5 0 100 10A5 5 0 0012 7zm0-5a1 1 0 011 1v2a1 1 0 01-2 0V3a1 1 0 011-1z"/>
+                  <path *ngIf="!theme.isDark()"
+                        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+                <span>{{ theme.isDark() ? 'Mode Jour' : 'Mode Nuit' }}</span>
+              </div>
+              <div class="relative w-10 h-5 rounded-full transition-colors duration-300 shrink-0"
+                   [class.bg-[#f0a500]]="theme.isDark()"
+                   [class.bg-white\/20]="!theme.isDark()">
+                <span class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow
+                             transition-all duration-300"
+                      [class.left-5]="theme.isDark()"
+                      [class.left-0.5]="!theme.isDark()">
+                </span>
+              </div>
+            </button>
+          </li>
+
+          <li class="border-t border-white/10 mt-1 pt-1">
+            <button (click)="logout()"
+              class="w-full flex items-center gap-3 px-4 py-2.5
+                     text-red-400 hover:text-red-300 hover:bg-red-500/10
+                     transition-all text-sm">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7
+                         a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              Déconnexion
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<div
+  id="search-bar"
+  *ngIf="searchOpen()"
+  class="md:hidden fixed top-16 left-0 right-0 z-40
+         bg-[#0d1b2a] border-b border-white/10 px-4 py-3
+         shadow-lg animate-[slideDown_0.2s_ease]">
+  <div class="relative">
+    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+      <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </div>
+    <input
+      type="text"
+      autofocus
+      [value]="worldService.searchTerm()"
+      (input)="onSearchChange($event)"
+      placeholder="Chercher un pays, une région…"
+      class="w-full pl-10 pr-4 py-2.5 rounded-xl
+             bg-white/8 border border-white/12
+             text-white/80 placeholder-white/35 text-sm
+             focus:outline-none focus:border-[#f0a500]/50"/>
+  </div>
+
+  @if (worldService.searchResults().length > 0) {
+    <div class="mt-2 bg-white/5 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+      @for (p of worldService.searchResults(); track p.cca3) {
+        <button (click)="goToDetails(p.cca3)"
+                class="w-full flex items-center gap-3 px-4 py-3 text-white/80 text-sm hover:bg-white/10">
+          <img [src]="p.flags.svg" class="w-5 h-3 object-cover rounded-sm" alt="drapeau">
+          {{ p.name.common }}
+        </button>
+      }
+    </div>
+  }
+</div>

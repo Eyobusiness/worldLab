@@ -1,0 +1,85 @@
+
+<button [routerLink]="['/pays']" class="text-[#f0a500] hover:text-[#f0a500]/80 transition-colors m-4 border border-[#f0a500] rounded-lg px-4 py-2">
+  < Retour à la liste
+</button>
+
+@if (pays(); as p) {
+  <div class="space-y-6">
+
+    <!-- En-tête -->
+    <div class="flex items-center gap-4 p-6
+                bg-white/5 border border-white/10 rounded-2xl">
+      <img [src]="p.flags.svg" alt="p.name.common"
+           class="w-24 rounded-lg shadow ring-1 ring-white/10">
+      <div>
+        <h1 class="text-3xl font-bold text-white">{{ p.name.common }}</h1>
+        <p class="text-white/40 text-sm mt-1">{{ p.name.official }}</p>
+      </div>
+    </div>
+
+    <!-- Infos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-1">Capitale</p>
+        <!-- ✅ p.capital est un tableau -->
+        <p class="text-white font-medium">{{ p.capital?.[0] ?? 'N/A' }}</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-1">Population</p>
+        <p class="text-white font-medium">{{ p.population.toLocaleString() }}</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-1">Région</p>
+        <p class="text-white font-medium">{{ p.region }}</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-1">Superficie</p>
+        <!-- ✅ area peut être undefined -->
+        <p class="text-white font-medium">{{ p.area ? p.area.toLocaleString() + ' km²' : 'N/A' }}</p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-2">Langues</p>
+        <!-- ✅ vérification propre -->
+        @if (p.languages) {
+          <div class="flex flex-wrap gap-2">
+            @for (lang of p.languages | keyvalue; track lang.key) {
+              <span class="px-2 py-1 bg-white/10 rounded-md text-white/70 text-xs">
+                {{ lang.value }}
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="text-white/40">N/A</p>
+        }
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-white/40 text-xs uppercase mb-2">Monnaies</p>
+        @if (p.currencies) {
+          <div class="flex flex-wrap gap-2">
+            @for (cur of p.currencies | keyvalue; track cur.key) {
+              <span class="px-2 py-1 bg-white/10 rounded-md text-white/70 text-xs">
+                {{ cur.key }} — {{ $any(cur.value).name }}
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="text-white/40">N/A</p>
+        }
+      </div>
+
+    </div>
+  </div>
+
+} @else {
+  <!-- Chargement -->
+  <div class="flex items-center justify-center py-20">
+    <div class="w-8 h-8 border-2 border-white/20 border-t-[#f0a500]
+                rounded-full animate-spin"></div>
+  </div>
+}

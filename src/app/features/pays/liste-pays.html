@@ -1,0 +1,109 @@
+<div class="space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-white text-2xl font-bold">Explorateur de Pays</h1>
+      <p class="text-white/40 text-sm">Parcourez la base de données mondiale</p>
+    </div>
+
+    <div class="relative group">
+      <span class="absolute inset-y-0 left-3 flex items-center text-white/30 group-focus-within:text-[#f0a500]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </span>
+      <input type="text"
+             (input)="onSearch($event)"
+             placeholder="Rechercher un pays, code, capitale..."
+             class="bg-white/5 border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-2.5 w-full md:w-80 focus:border-[#f0a500]/50 focus:outline-none focus:ring-1 focus:ring-[#f0a500]/50 transition-all">
+    </div>
+  </div>
+
+  <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-white/5 border-b border-white/10">
+          <tr>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Pays</th>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Code</th>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Capitale</th>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Région</th>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Population</th>
+            <th class="px-6 py-4 text-white/40 text-[10px] uppercase tracking-wider font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          @for (p of pagedPays(); track p.cca3) {
+            <tr class="hover:bg-white/5 transition-colors group cursor-pointer">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <img [src]="p.flags.svg" class="w-8 h-5 object-cover rounded shadow-sm ring-1 ring-white/10" alt="drapeau">
+                  <span class="text-white font-medium group-hover:text-[#f0a500]">{{ p.name.common }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-white/60 font-mono text-xs">{{ p.cca3 }}</td>
+              <td class="px-6 py-4 text-white/60 text-sm">{{ p.capital ? p.capital[0] : '-' }}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 rounded-md bg-white/5 text-white/50 text-[10px] uppercase border border-white/10">
+                  {{ p.region }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-white/60 text-sm">{{ ws.formatPopulation(p.population) }}</td>
+              <td class="px-6 py-4">
+                <button [routerLink]="['/details-pays', p.cca3]" [title]="'Détails de ' + p.name.common"
+                        class="text-[#f0a500] hover:text-[#f0a500]/80 transition-colors">
+                  Détails
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-6 py-20 text-center text-white/20 italic">
+                Aucun pays ne correspond à votre recherche...
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (totalPages() > 1) {
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+      <span class="text-white/30 text-xs">
+        Page <b class="text-white/60">{{ currentPage() }}</b> sur <b class="text-white/60">{{ totalPages() }}</b>
+      </span>
+
+      <div class="flex items-center gap-1">
+        <button title="page" (click)="changePage(currentPage() - 1)"
+                [disabled]="currentPage() === 1"
+                class="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div class="flex items-center gap-1 px-2">
+          @if (currentPage() > 3) {
+            <button (click)="changePage(1)" class="w-8 h-8 text-xs text-white/40 hover:text-white">1</button>
+            <span class="text-white/20">...</span>
+          }
+
+          <button class="w-8 h-8 rounded-lg bg-[#f0a500] text-black text-xs font-bold" title="Page actuelle">
+            {{ currentPage() }}
+          </button>
+
+          @if (currentPage() < totalPages()) {
+            <span class="text-white/20">...</span>
+            <button (click)="changePage(totalPages())" class="w-8 h-8 text-xs text-white/40 hover:text-white" title="Dernière page">
+              {{ totalPages() }}
+            </button>
+          }
+        </div>
+
+        <button (click)="changePage(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()" title="page suivante"
+                class="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  }
+</div>

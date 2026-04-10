@@ -1,0 +1,216 @@
+<div class="space-y-6">
+
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-white text-2xl font-bold tracking-tight">Dashboard</h1>
+      <p class="text-white/40 text-sm mt-0.5">Vue d'ensemble des données mondiales</p>
+    </div>
+    <div class="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
+      <button class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 text-white">
+        Dashboard
+      </button>
+      <a routerLink="/pays"
+         class="px-3 py-1.5 rounded-lg text-xs font-medium text-white/50 hover:text-white
+                hover:bg-white/8 transition-all">
+        Liste des pays
+      </a>
+      <a routerLink="/comparaison"
+         class="px-3 py-1.5 rounded-lg text-xs font-medium text-white/50 hover:text-white
+                hover:bg-white/8 transition-all">
+        Comparaison
+      </a>
+    </div>
+  </div>
+
+  @if (ws.loading()) {
+    <div class="flex flex-col items-center justify-center py-20 gap-4">
+      <div class="w-10 h-10 rounded-full border-2 border-[#f0a500]/30
+                  border-t-[#f0a500] animate-spin"></div>
+      <p class="text-white/40 text-sm">Chargement des données mondiales…</p>
+    </div>
+  }
+
+  @if (ws.error() && !ws.loading()) {
+    <div class="flex items-center gap-3 px-4 py-4 rounded-xl
+                bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ ws.error() }}
+      <button (click)="ws.loadAll().subscribe()"
+              class="ml-auto px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30
+                     transition-colors text-xs font-medium">
+        Réessayer
+      </button>
+    </div>
+  }
+
+  @if (!ws.loading() && !ws.error()) {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+
+  <div class="stat-card group relative overflow-hidden
+              bg-white/5 border border-white/10 rounded-2xl p-5
+              hover:border-[#f0a500]/30 hover:bg-white/8 transition-all duration-300">
+    <div class="absolute top-0 left-0 right-0 h-0.5
+                bg-linear-to-r from-[#f0a500] to-transparent rounded-full"></div>
+    <p class="text-white/40 text-[10px] tracking-[0.15em] uppercase font-semibold mb-2">
+      Pays totaux
+    </p>
+    <p class="text-[#f0a500] text-3xl md:text-4xl font-black leading-none mb-1">
+      {{ ws.totalPays() }}
+    </p>
+    <div class="flex items-center gap-1.5 mt-2">
+      <span class="text-white/30 text-xs">Nations répertoriées</span>
+    </div>
+  </div>
+
+  <div class="stat-card group relative overflow-hidden
+              bg-white/5 border border-white/10 rounded-2xl p-5
+              hover:border-emerald-500/30 hover:bg-white/8 transition-all duration-300">
+    <div class="absolute top-0 left-0 right-0 h-0.5
+                bg-linear-to-r from-emerald-400 to-transparent rounded-full"></div>
+    <p class="text-white/40 text-[10px] tracking-[0.15em] uppercase font-semibold mb-2">
+      Population mondiale
+    </p>
+    <p class="text-emerald-400 text-3xl md:text-4xl font-black leading-none mb-1">
+      {{ ws.formatPopulation(ws.populationMondiale()) }}
+    </p>
+    <div class="flex items-center gap-1.5 mt-2">
+      <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+      </svg>
+      <span class="text-emerald-400 text-xs font-medium">{{ croissancePopulation }}</span>
+    </div>
+  </div>
+
+  <div class="stat-card group relative overflow-hidden
+              bg-white/5 border border-white/10 rounded-2xl p-5
+              hover:border-sky-500/30 hover:bg-white/8 transition-all duration-300">
+    <div class="absolute top-0 left-0 right-0 h-0.5
+                bg-linear-to-r from-sky-400 to-transparent rounded-full"></div>
+    <p class="text-white/40 text-[10px] tracking-[0.15em] uppercase font-semibold mb-2">
+      Langues recensées
+    </p>
+    <p class="text-sky-400 text-3xl md:text-4xl font-black leading-none mb-1">
+      {{ ws.totalLangues() }}+
+    </p>
+    <span class="text-white/30 text-xs">parmi les pays chargés</span>
+  </div>
+
+</div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-5
+                  hover:border-white/15 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-white/80 text-xs tracking-[0.15em] uppercase font-semibold">
+            Top Population
+          </h2>
+          <button
+            (click)="topLimit.set(topLimit() === 5 ? 10 : 5)"
+            class="text-[#f0a500] text-xs hover:underline transition-all">
+            {{ topLimit() === 5 ? 'Voir plus' : 'Réduire' }}
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          @for (pays of topPays; track pays.cca3; let i = $index) {
+            <div class="flex items-center gap-3 group">
+
+              <span class="text-white/25 text-xs font-mono w-4 shrink-0 text-right">
+                {{ i + 1 }}
+              </span>
+
+              <img alt="drapeau"
+                [src]="pays.flags.svg"
+                [alt]="pays.name.common"
+                class="w-7 h-5 object-cover rounded shrink-0
+                       shadow-sm ring-1 ring-white/10"
+                loading="lazy"/>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-[#f0a500] text-xs font-bold shrink-0">
+                    {{ pays.cca2 }}
+                  </span>
+                  <span class="text-white/80 text-sm font-medium truncate
+                               group-hover:text-white transition-colors">
+                    {{ pays.name.common }}
+                  </span>
+                </div>
+                <div class="mt-1.5 h-1.5 bg-white/8 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500"
+                    [style.width]="getPopBarWidth(pays.population)"
+                    [style.backgroundColor]="getPopBarColor(i)">
+                  </div>
+                </div>
+              </div>
+
+              <span class="text-white/60 text-xs font-mono shrink-0">
+                {{ ws.formatPopulation(pays.population) }}
+              </span>
+
+            </div>
+          }
+        </div>
+      </div><div class="bg-white/5 border border-white/10 rounded-2xl p-5
+                  hover:border-white/15 transition-all duration-300">
+        <h2 class="text-white/80 text-xs tracking-[0.15em] uppercase font-semibold mb-4">
+          Pays par Région
+        </h2>
+
+        <div class="space-y-3">
+          @for (item of ws.paysByRegion(); track item.region) {
+            <div class="flex items-center gap-3 group cursor-pointer"
+                 [routerLink]="['/continent', item.region.toLowerCase()]">
+
+              <span class="text-base w-6 text-center shrink-0">
+                {{ getRegionConfig(item.region).emoji }}
+              </span>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-white/70 text-sm font-medium
+                               group-hover:text-white transition-colors">
+                    {{ item.region }}
+                  </span>
+                  <span class="text-white/50 text-xs font-mono">{{ item.count }}</span>
+                </div>
+                <div class="h-2 bg-white/8 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-700"
+                    [style.width]="getBarWidth(item.count)"
+                    [style.backgroundColor]="getRegionConfig(item.region).color">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+        <div class="mt-4 pt-4 border-t border-white/8
+                    flex items-center justify-between">
+          <span class="text-white/30 text-xs">Total mondial</span>
+          <span class="text-[#f0a500] text-sm font-bold">{{ ws.totalPays() }} pays</span>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden
+            hover:border-white/15 transition-all duration-300">
+  <div class="px-5 py-3 border-b border-white/8 flex items-center justify-between">
+    <h2 class="text-white/80 text-xs tracking-[0.15em] uppercase font-semibold">
+      Carte interactive
+    </h2>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="text-white/30 text-xs">REST Countries API v3.1</span>
+    </div>
+  </div>
+  <app-world-map></app-world-map>
+</div>
+  }
+</div>

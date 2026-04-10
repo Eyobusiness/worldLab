@@ -1,0 +1,310 @@
+<div class="space-y-6">
+
+  <!-- ── En-tête ──────────────────────────────────── -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h1 class="text-white text-2xl font-bold">Comparaison de pays</h1>
+      <p class="text-white/40 text-sm">Sélectionnez de 2 à 10 pays puis choisissez vos critères</p>
+    </div>
+    @if (codesSelectionnes().length > 0) {
+      <button (click)="reinitialiser()"
+              class="self-start sm:self-auto flex items-center gap-2 px-4 py-2 rounded-xl
+                     bg-white/5 border border-white/10 text-white/60
+                     hover:bg-white/10 hover:text-white transition-all text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581
+                   m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Réinitialiser
+      </button>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- ══ COLONNE GAUCHE : Sélection ══════════════ -->
+    <div class="lg:col-span-1 space-y-4">
+
+      <!-- Compteur sélection -->
+      <div class="flex items-center justify-between">
+        <span class="text-white/60 text-sm font-medium">Pays sélectionnés</span>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+              [class.bg-\[\#f0a500\]]="codesSelectionnes().length >= 2"
+              [class.text-black]="codesSelectionnes().length >= 2"
+              [class.bg-white\/10]="codesSelectionnes().length < 2"
+              [class.text-white\/50]="codesSelectionnes().length < 2">
+          {{ codesSelectionnes().length }} / 10
+        </span>
+      </div>
+
+      <!-- Pills des pays sélectionnés -->
+      @if (codesSelectionnes().length > 0) {
+        <div class="flex flex-wrap gap-2">
+          @for (code of codesSelectionnes(); track code; let i = $index) {
+            @let pays = tousPays().find(p => p.cca3 === code);
+            @if (pays) {
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full
+                          bg-white/10 border border-white/15 text-sm">
+                <img [src]="pays.flags.svg" class="w-4 h-3 object-cover rounded-sm" alt="">
+                <span class="text-white/80 text-xs">{{ pays.name.common }}</span>
+                <button (click)="togglePays(code)" title="pays"
+                        class="text-white/30 hover:text-white/80 transition-colors ml-0.5">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- Recherche pays -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <svg class="w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input type="text"
+               placeholder="Filtrer les pays…"
+               [value]="recherche()"
+               (input)="recherche.set($any($event.target).value)"
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10
+                      text-white/80 placeholder-white/30 text-sm
+                      focus:outline-none focus:border-[#f0a500]/50 transition-all"/>
+      </div>
+
+      <!-- Liste des pays -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <div class="max-h-105 overflow-y-auto custom-scroll">
+          @if (ws.loading()) {
+            <div class="flex items-center justify-center py-12">
+              <div class="w-6 h-6 border-2 border-white/10 border-t-[#f0a500] rounded-full animate-spin"></div>
+            </div>
+          } @else {
+            @for (p of paysFiltres(); track p.cca3) {
+              <button
+                (click)="togglePays(p.cca3)"
+                class="w-full flex items-center gap-3 px-4 py-2.5 transition-all text-left
+                       border-b border-white/5 last:border-0"
+                [class.bg-white\/10]="estSelectionne(p.cca3)"
+                [class.hover:bg-white\/8]="!estSelectionne(p.cca3)"
+                [class.hover:bg-white\/15]="estSelectionne(p.cca3)">
+
+                <!-- Checkbox visuel -->
+                <div class="w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all"
+                     [style.border-color]="estSelectionne(p.cca3) ? couleurPays(codesSelectionnes().indexOf(p.cca3)) : 'rgba(255,255,255,0.2)'"
+                     [style.background]="estSelectionne(p.cca3) ? couleurPays(codesSelectionnes().indexOf(p.cca3)) : 'transparent'">
+                  @if (estSelectionne(p.cca3)) {
+                    <svg class="w-2.5 h-2.5 text-black" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414
+                            0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  }
+                </div>
+
+                <img [src]="p.flags.svg" class="w-7 h-4.5 object-cover rounded-sm shadow shrink-0" alt="">
+
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm truncate"
+                     [class.text-white]="estSelectionne(p.cca3)"
+                     [class.text-white\/70]="!estSelectionne(p.cca3)">
+                    {{ p.name.common }}
+                  </p>
+                  <p class="text-[10px] text-white/30">{{ p.region }}</p>
+                </div>
+
+                <!-- Numéro d'ordre -->
+                @if (estSelectionne(p.cca3)) {
+                  <span class="text-[10px] font-bold shrink-0"
+                        [style.color]="couleurPays(codesSelectionnes().indexOf(p.cca3))">
+                    #{{ codesSelectionnes().indexOf(p.cca3) + 1 }}
+                  </span>
+                }
+              </button>
+            } @empty {
+              <p class="text-center text-white/20 py-10 text-sm italic">Aucun pays trouvé</p>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COLONNE DROITE : Critères + Résultats ═══ -->
+    <div class="lg:col-span-2 space-y-5">
+
+      <!-- Critères de comparaison -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+        <p class="text-white/60 text-xs uppercase tracking-wider mb-3 font-semibold">
+          Critères de comparaison
+        </p>
+        <div class="flex flex-wrap gap-3">
+          @for (c of criteres; track c.key) {
+            <button
+              (click)="toggleCritere(c.key)"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm
+                     transition-all duration-200 font-medium"
+              [class.bg-\[\#f0a500\]]="critereCoche(c.key)"
+              [class.text-black]="critereCoche(c.key)"
+              [class.border-\[\#f0a500\]]="critereCoche(c.key)"
+              [class.bg-white\/5]="!critereCoche(c.key)"
+              [class.text-white\/60]="!critereCoche(c.key)"
+              [class.border-white\/10]="!critereCoche(c.key)"
+              [class.hover:border-white\/30]="!critereCoche(c.key)">
+              @if (critereCoche(c.key)) {
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0
+                       01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"/>
+                </svg>
+              }
+              {{ c.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Bouton Comparer -->
+      <button
+        (click)="comparer()" 
+        [disabled]="codesSelectionnes().length < 2"
+        class="w-full py-3 rounded-xl font-bold text-base transition-all duration-200
+               disabled:opacity-30 cursor-pointer text-white border-2 border-[#f0a500] disabled:border-white/10"
+        [class.bg-\[\#f0a500\]]="codesSelectionnes().length >= 2"
+        [class.text-black]="codesSelectionnes().length >= 2"
+        [class.hover:opacity-90]="codesSelectionnes().length >= 2"
+        [class.bg-white\/10]="codesSelectionnes().length < 2"
+        [class.text-white\/40]="codesSelectionnes().length < 2">
+        @if (codesSelectionnes().length < 2) {
+          Sélectionnez au moins 2 pays
+        } @else {
+          ⚖️ Comparer {{ codesSelectionnes().length }} pays
+        }
+      </button>
+
+      <!-- Erreur -->
+      @if (erreur()) {
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl
+                    bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58
+                 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92z"
+                  clip-rule="evenodd"/>
+          </svg>
+          {{ erreur() }}
+        </div>
+      }
+
+      <!-- ── RÉSULTATS ──────────────────────────── -->
+      @if (afficherResultats() && paysCompares().length >= 2) {
+
+        <!-- Tableau récapitulatif -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-white/5 border-b border-white/10">
+                <tr>
+                  <th class="px-4 py-3 text-white/40 text-[10px] uppercase tracking-wider">Critère</th>
+                  @for (p of paysCompares(); track p.cca3; let i = $index) {
+                    <th class="px-4 py-3 text-[10px] uppercase tracking-wider">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full shrink-0"
+                             [style.background]="couleurPays(i)"></div>
+                        <span class="truncate max-w-22.5"
+                              [style.color]="couleurPays(i)">
+                          {{ p.name.common }}
+                        </span>
+                      </div>
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                @for (c of criteresActifs(); track c.key) {
+                  <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-4 py-3 text-white/50 text-xs font-medium">{{ c.label }}</td>
+                    @for (p of paysCompares(); track p.cca3; let i = $index) {
+                      <td class="px-4 py-3 text-sm font-semibold"
+                          [class.text-\[\#f0a500\]]="estLeader(p, c)"
+                          [class.text-white\/70]="!estLeader(p, c)">
+                        {{ c.format(p) }}
+                        @if (estLeader(p, c)) {
+                          <span class="ml-1 text-[9px]">🏆</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Graphiques barres par critère -->
+        @for (c of criteresActifs(); track c.key) {
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <p class="text-white/60 text-xs uppercase tracking-wider mb-4 font-semibold">
+              {{ c.label }} <span class="text-white/30 normal-case font-normal ml-1">({{ c.unite }})</span>
+            </p>
+            <div class="space-y-3">
+              @for (p of paysCompares(); track p.cca3; let i = $index) {
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <img [src]="p.flags.svg" class="w-5 h-3.5 object-cover rounded-sm" alt="">
+                      <span class="text-white/70 text-xs">{{ p.name.common }}</span>
+                      @if (estLeader(p, c)) {
+                        <span class="text-[10px]">🏆</span>
+                      }
+                    </div>
+                    <span class="text-xs font-semibold"
+                          [style.color]="couleurPays(i)">
+                      {{ c.format(p) }}
+                    </span>
+                  </div>
+                  <!-- Barre de progression -->
+                  <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-700"
+                         [style.width.%]="pourcentage(p, c)"
+                         [style.background]="couleurPays(i)">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Drapeaux récap -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <p class="text-white/60 text-xs uppercase tracking-wider mb-4 font-semibold">
+            Pays comparés
+          </p>
+          <div class="flex flex-wrap gap-3">
+            @for (p of paysCompares(); track p.cca3; let i = $index) {
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+                <div class="w-2 h-2 rounded-full shrink-0" [style.background]="couleurPays(i)"></div>
+                <img [src]="p.flags.svg" class="w-7 h-5 object-cover rounded shadow" alt="">
+                <div>
+                  <p class="text-white text-xs font-medium">{{ p.name.common }}</p>
+                  <p class="text-white/30 text-[10px]">{{ p.region }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>

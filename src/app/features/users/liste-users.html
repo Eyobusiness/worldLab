@@ -1,0 +1,35 @@
+<div class="p-6">
+  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Annuaire des Utilisateurs</h2>
+
+  @if (loading()) {
+    <div class="flex justify-center p-10">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f0a500]"></div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (user of users(); track user.id) {
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-[#f0a500] flex items-center justify-center text-white font-bold">
+              {{ user.name[0] }}
+            </div>
+            <div>
+              <h3 class="font-semibold">{{ user.name }}</h3>
+              <p class="text-xs text-gray-500">{{ user.email }}</p>
+            </div>
+          </div>
+          
+          <div class="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Ville:</strong> {{ user.address.city }}</p>
+            <p><strong>Entreprise:</strong> {{ user.company.name }}</p>
+          </div>
+          
+          <button class="mt-4 w-full py-2 text-sm text-[#f0a500] border border-[#f0a500] rounded-lg hover:bg-[#f0a500] hover:text-white transition">
+            Voir le profil
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

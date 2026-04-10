@@ -1,0 +1,243 @@
+<!-- ===== OVERLAY mobile (clic en dehors ferme le menu) ===== -->
+<div
+  *ngIf="theme.sidebarOpen()"
+  (click)="theme.toggleSidebar()"
+  class="md:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm">
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside
+  class="fixed top-16 left-0 bottom-0 z-40
+         w-64 flex flex-col
+         bg-[#0a1628] border-r border-white/8
+         shadow-[4px_0_24px_rgba(0,0,0,0.3)]
+         transition-transform duration-300 ease-in-out"
+  [ngClass]="{
+    'translate-x-0':    theme.sidebarOpen(),
+    '-translate-x-full': !theme.sidebarOpen()
+  }">
+
+  <!-- Contenu scrollable -->
+  <div class="flex flex-col h-full overflow-y-auto overflow-x-hidden
+              scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+
+    <!-- ── NAVIGATION ── -->
+    <div class="px-3 pt-5 pb-2">
+      <p class="text-white/25 text-[10px] tracking-[0.18em] uppercase font-semibold px-3 mb-2">
+        Navigation
+      </p>
+      <nav class="space-y-0.5">
+
+        <!-- Dashboard -->
+        <a routerLink="/dashboard" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="w-5 h-5 shrink-0">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5z
+                       M14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5z
+                       M4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4z
+                       M14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+            </svg>
+          </span>
+          <span class="font-medium">Dashboard</span>
+        </a>
+
+        <!-- Pays -->
+        <a routerLink="/pays" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="w-5 h-5 shrink-0">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/>
+            </svg>
+          </span>
+          <span class="font-medium flex-1">Pays</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/10 text-white/50 text-[10px] font-semibold">{{ ws.totalPays() }}</span>
+        </a>
+
+        <!-- Comparaison -->
+        <a routerLink="/comparaison" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="w-5 h-5 shrink-0">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2z
+                       M15 13v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2h-2a2 2 0 00-2 2z
+                       M9 9V7a2 2 0 012-2h2a2 2 0 012 2v2"/>
+            </svg>
+          </span>
+          <span class="font-medium">Comparaison</span>
+        </a>
+
+      </nav>
+    </div>
+
+    <!-- Divider -->
+    <div class="mx-4 my-2 border-t border-white/8"></div>
+
+    <!-- ── FILTRES / RÉGIONS ── -->
+    <div class="px-3 pb-2">
+      <p class="text-white/25 text-[10px] tracking-[0.18em] uppercase font-semibold px-3 mb-2">
+        Filtres
+      </p>
+      <nav class="space-y-0.5">
+
+        <a routerLink="/africa" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🌍</span>
+          <span class="font-medium flex-1">Afrique</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-400">{{ totalAfrique() }}</span>
+        </a>
+
+        <a routerLink="/asia" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🌏</span>
+          <span class="font-medium flex-1">Asie</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#f0a500]/20 text-[#f0a500]">{{ totalAsie() }}</span>
+        </a>
+
+        <a routerLink="/americas" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🌎</span>
+          <span class="font-medium flex-1">Amériques</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">{{ totalAmeriques() }}</span>
+        </a>
+
+        <a routerLink="/europe" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🌐</span>
+          <span class="font-medium flex-1">Europe</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/20 text-sky-400">{{ totalEurope() }}</span>
+        </a>
+
+        <a routerLink="/oceania" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🏝️</span>
+          <span class="font-medium flex-1">Océanie</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/20 text-violet-400">{{ totalOceanie() }}</span>
+        </a>
+        <a routerLink="/antarctic" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="text-base leading-none w-5 text-center">🏝️</span>
+          <span class="font-medium flex-1">Antarctique</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/20 text-violet-400">{{ totalAntarctique() }}</span>
+        </a>
+
+      </nav>
+    </div>
+
+    <!-- Divider -->
+    <div class="mx-4 my-2 border-t border-white/8"></div>
+
+    <!-- ── ADMINISTRATION ── -->
+    <div class="px-3 pb-2 flex-1">
+      <p class="text-white/25 text-[10px] tracking-[0.18em] uppercase font-semibold px-3 mb-2">
+        Administration
+      </p>
+      <nav class="space-y-0.5">
+
+        <!-- Profil & Users accordion -->
+        <div>
+          <button
+            (click)="toggleProfil()"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                   text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+            <span class="w-5 h-5 shrink-0">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857
+                         M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857
+                         m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </span>
+            <span class="font-medium flex-1 text-left">Profil &amp; Users</span>
+            <svg class="w-4 h-4 text-white/30 shrink-0 transition-transform duration-300"
+                 [class.rotate-180]="profilExpanded()"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <!-- Sous-menu -->
+          <div class="overflow-hidden transition-all duration-300 ease-in-out"
+               [style.maxHeight]="profilExpanded() ? '120px' : '0px'">
+            <div class="pl-11 pr-3 py-1 space-y-0.5">
+
+              <a routerLink="/liste-users" routerLinkActive="active-nav"
+                 (click)="closeOnMobile()"
+                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm
+                        text-white/50 hover:text-white hover:bg-white/8 transition-all duration-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/30 shrink-0"></span>
+                Utilisateurs
+              </a>
+
+              <!-- <a routerLink="/admin/permissions" routerLinkActive="active-nav"
+                 (click)="closeOnMobile()"
+                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm
+                        text-white/50 hover:text-white hover:bg-white/8 transition-all duration-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/30 shrink-0"></span>
+                Profil &amp; Permissions
+              </a> -->
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Paramètre système -->
+        <!-- <a routerLink="/admin/parametres" routerLinkActive="active-nav"
+           (click)="closeOnMobile()"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                  text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200">
+          <span class="w-5 h-5 shrink-0">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066
+                       c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572
+                       c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573
+                       c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065
+                       c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066
+                       c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572
+                       c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573
+                       c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </span>
+          <span class="font-medium">Paramètre système</span>
+        </a> -->
+
+      </nav>
+    </div>
+
+    <!-- ── Bas : statut API ── -->
+    <div class="px-4 py-4 border-t border-white/8">
+      <div class="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399] animate-pulse shrink-0"></div>
+        <div class="min-w-0">
+          <p class="text-white/60 text-xs font-medium">REST Countries API</p>
+          <p class="text-white/30 text-[10px]">v3.1 · Active</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</aside>

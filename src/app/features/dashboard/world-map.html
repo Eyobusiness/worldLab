@@ -1,0 +1,231 @@
+<div class="relative w-full">
+
+  <!-- ── Barre d'outils ─────────────────────────── -->
+  <div class="flex items-center justify-between px-5 py-3 border-b border-white/8">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full animate-pulse"
+            [class.bg-emerald-400]="points().length > 0"
+            [class.bg-red-400]="points().length === 0"></span>
+      <span class="text-white/30 text-xs">
+        {{ points().length }} points affichés
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- Légende régions -->
+      <div class="hidden sm:flex items-center gap-3 mr-2">
+        @for (item of [
+          {label:'Afrique',   color:'#f0a500'},
+          {label:'Amériques', color:'#4ade80'},
+          {label:'Asie',      color:'#60a5fa'},
+          {label:'Europe',    color:'#f472b6'},
+          {label:'Océanie',   color:'#a78bfa'}
+        ]; track item.label) {
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full" [style.background]="item.color"></span>
+            <span class="text-white/30 text-[10px]">{{ item.label }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Toggle mode -->
+      <div class="inline-flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+
+  <button
+    (click)="mode.set('capitals')"
+    title="Afficher les capitales"
+    class="px-4 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all duration-200 cursor-pointer"
+    [ngClass]="mode() === 'capitals'
+      ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
+      : 'text-white/40 hover:text-white/70 hover:bg-white/5'">
+    CAPITALES
+  </button>
+
+  <button
+    (click)="mode.set('countries')"
+    title="Afficher les pays"
+    class="px-4 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all duration-200 cursor-pointer"
+    [ngClass]="mode() === 'countries'
+      ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
+      : 'text-white/40 hover:text-white/70 hover:bg-white/5'">
+    PAYS
+  </button>
+
+</div>
+    </div>
+  </div>
+
+  <!-- ── Carte SVG ───────────────────────────────── -->
+
+  <!-- ← "map-container" nécessaire pour positionner le tooltip -->
+  <div class="map-container relative overflow-hidden bg-[#060d1a]">
+
+    <svg
+      [attr.viewBox]="'0 0 ' + W + ' ' + H"
+      class="w-full h-auto select-none"
+      xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <filter id="glow-gold" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-strong" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0a1628"/>
+          <stop offset="100%" stop-color="#060d1a"/>
+        </linearGradient>
+        <pattern id="grid" width="100" height="50" patternUnits="userSpaceOnUse">
+          <path d="M 100 0 L 0 0 0 50" fill="none"
+                stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+
+      <!-- Fond océan -->
+      <rect width="1000" height="500" fill="url(#ocean)"/>
+      <!-- Grille -->
+      <rect width="1000" height="500" fill="url(#grid)"/>
+
+      <!-- Équateur -->
+      <line x1="0" [attr.y1]="latToY(0)"
+            x2="1000" [attr.y2]="latToY(0)"
+            stroke="rgba(255,255,255,0.06)" stroke-width="0.8"
+            stroke-dasharray="4 6"/>
+      <!-- Tropique Cancer -->
+      <line x1="0" [attr.y1]="latToY(23.5)"
+            x2="1000" [attr.y2]="latToY(23.5)"
+            stroke="rgba(240,165,0,0.04)" stroke-width="0.5"
+            stroke-dasharray="2 8"/>
+      <!-- Tropique Capricorne -->
+      <line x1="0" [attr.y1]="latToY(-23.5)"
+            x2="1000" [attr.y2]="latToY(-23.5)"
+            stroke="rgba(240,165,0,0.04)" stroke-width="0.5"
+            stroke-dasharray="2 8"/>
+      <!-- Méridien Greenwich -->
+      <line [attr.x1]="lngToX(0)" y1="0"
+            [attr.x2]="lngToX(0)" y2="500"
+            stroke="rgba(255,255,255,0.05)" stroke-width="0.8"
+            stroke-dasharray="4 6"/>
+
+      <!-- Labels -->
+      <text x="5" [attr.y]="latToY(0) - 3"
+            fill="rgba(255,255,255,0.12)" font-size="8">Équateur</text>
+      <text x="5" [attr.y]="latToY(23.5) - 3"
+            fill="rgba(240,165,0,0.15)" font-size="7">Tropique Cancer</text>
+      <text x="5" [attr.y]="latToY(-23.5) - 3"
+            fill="rgba(240,165,0,0.15)" font-size="7">Tropique Capricorne</text>
+
+      <!-- ── Points lumineux ─────────────────────────── -->
+      @for (pt of points(); track pt.pays.cca3) {
+        <g
+          (mouseenter)="onHover($event, pt.pays)"
+          (mouseleave)="onLeave()"
+          class="cursor-pointer"
+          style="transition: opacity 0.2s">
+
+          <!-- Halo externe -->
+          <circle
+            [attr.cx]="lngToX(pt.lng)"
+            [attr.cy]="latToY(pt.lat)"
+            r="5"
+            [attr.fill]="regionColor(pt.pays.region)"
+            opacity="0.15"
+            filter="url(#glow-strong)"/>
+
+          <!-- Anneau intermédiaire -->
+          <circle
+            [attr.cx]="lngToX(pt.lng)"
+            [attr.cy]="latToY(pt.lat)"
+            r="2.5"
+            [attr.fill]="regionColor(pt.pays.region)"
+            opacity="0.4"
+            filter="url(#glow-gold)"/>
+
+          <!-- Point central -->
+          <circle
+            [attr.cx]="lngToX(pt.lng)"
+            [attr.cy]="latToY(pt.lat)"
+            r="1.5"
+            [attr.fill]="regionColor(pt.pays.region)"
+            opacity="0.95"/>
+
+        </g>
+      }
+
+      <!-- Point survolé mis en avant -->
+      @if (hovered()) {
+        @let hv = hovered()!;
+        @let hvCoords = mode() === 'capitals'
+          ? (hv.capitalInfo?.latlng ?? hv.latlng)
+          : hv.latlng;
+        @if (hvCoords) {
+          <g>
+            <circle
+              [attr.cx]="lngToX(hvCoords[1])"
+              [attr.cy]="latToY(hvCoords[0])"
+              r="8"
+              fill="white"
+              opacity="0.12"
+              filter="url(#glow-strong)"/>
+            <circle
+              [attr.cx]="lngToX(hvCoords[1])"
+              [attr.cy]="latToY(hvCoords[0])"
+              r="3"
+              fill="white"
+              opacity="1"/>
+          </g>
+        }
+      }
+
+    </svg>
+
+    <!-- ── Tooltip ──────────────────────────────── -->
+    @if (hovered()) {
+      @let h = hovered()!;
+      <div
+        class="absolute z-20 pointer-events-none
+               bg-[#0d1b2a]/95 border border-white/15 rounded-xl
+               px-3 py-2.5 shadow-xl backdrop-blur-sm min-w-45"
+        [style.left.px]="tooltipX()"
+        [style.top.px]="tooltipY()">
+
+        <div class="flex items-center gap-2 mb-1.5">
+          <img [src]="h.flags.svg" class="w-6 h-4 object-cover rounded-sm shadow" alt="">
+          <span class="text-white text-sm font-semibold">{{ h.name.common }}</span>
+        </div>
+
+        <div class="space-y-0.5 text-xs">
+          @if (h.capital?.[0]) {
+            <div class="flex justify-between gap-4">
+              <span class="text-white/40">Capitale</span>
+              <span class="text-white/80">{{ h.capital![0] }}</span>
+            </div>
+          }
+          <div class="flex justify-between gap-4">
+            <span class="text-white/40">Population</span>
+            <span class="text-white/80">{{ ws.formatPopulation(h.population) }}</span>
+          </div>
+          <div class="flex justify-between gap-4">
+            <span class="text-white/40">Région</span>
+            <span class="font-medium" [style.color]="regionColor(h.region)">{{ h.region }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Loader -->
+    @if (ws.loading()) {
+      <div class="absolute inset-0 flex items-center justify-center bg-[#060d1a]/80">
+        <div class="flex flex-col items-center gap-3">
+          <div class="w-8 h-8 border-2 border-white/10 border-t-[#f0a500]
+                      rounded-full animate-spin"></div>
+          <p class="text-white/30 text-xs">Chargement de la carte…</p>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

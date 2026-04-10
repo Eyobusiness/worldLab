@@ -1,0 +1,104 @@
+<div class="login-page">
+
+  <div class="login-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <span class="logo-icon">🌍</span>
+      <h1 class="logo-name">WorldLab</h1>
+      <p class="logo-sub">Explorez les données mondiales</p>
+    </div>
+
+    <!-- Formulaire -->
+    <form class="login-form" (ngSubmit)="onSubmit()">
+
+      <h2 class="form-title">Connexion</h2>
+
+      <!-- Erreur -->
+      @if (error()) {
+        <div class="alert-error">
+          <span>⚠️</span> {{ error() }}
+        </div>
+      }
+
+      <!-- Username -->
+      <div class="field">
+        <label class="field-label" for="username">Nom d'utilisateur</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input
+            id="username"
+            class="input"
+            type="text"
+            placeholder="ex: Bret"
+            [value]="username()"
+            (input)="username.set($any($event.target).value)"
+            autocomplete="username"
+            [disabled]="loading()"
+          />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label class="field-label" for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input
+            id="password"
+            class="input"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="••••••••"
+            [value]="password()"
+            (input)="password.set($any($event.target).value)"
+            autocomplete="current-password"
+            [disabled]="loading()"
+          />
+          <button
+            type="button"
+            class="toggle-pw"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'Masquer' : 'Afficher'"
+          >
+            {{ showPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Bouton submit -->
+      <button class="btn-login" type="submit" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spinner"></span> Connexion…
+        } @else {
+          🚀 Se connecter
+        }
+      </button>
+
+    </form>
+
+    <!-- Comptes de démo -->
+    <div class="demo-section">
+      <p class="demo-title">Comptes de test disponibles</p>
+      <div class="demo-list">
+        @for (acc of demoAccounts; track acc.username) {
+          <button class="demo-btn" type="button" (click)="fillDemo(acc)">
+            {{ acc.username }}
+          </button>
+        }
+      </div>
+      <p class="demo-hint">
+        💡 Cliquez sur un compte pour remplir automatiquement
+      </p>
+    </div>
+
+  </div>
+
+  <p class="login-footer">© 2026 WorldLab · API : jsonplaceholder.typicode.com</p>
+
+</div>
