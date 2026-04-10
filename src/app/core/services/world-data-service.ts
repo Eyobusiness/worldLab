@@ -10,9 +10,7 @@ export class WorldDataService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
 
-  private readonly API = isPlatformServer(this.platformId)
-    ? 'https://restcountries.com/v3.1'
-    : (environment as any).apiUrl || 'https://restcountries.com/v3.1';
+  private readonly API = this.resolveApiBase();
 
   // ── ROUTE 1 : Liste/Dashboard (original intact) ───
   private readonly FIELDS =
@@ -170,4 +168,15 @@ export class WorldDataService {
       )
       .slice(0, 8); // On limite à 8 résultats pour l'affichage
   });
+
+  private resolveApiBase(): string {
+    const configuredApi = (environment as any).apiUrl || 'https://restcountries.com/v3.1';
+
+    // En SSR, une URL relative casse les requêtes Node.
+    if (isPlatformServer(this.platformId) && configuredApi.startsWith('/')) {
+      return 'https://restcountries.com/v3.1';
+    }
+
+    return configuredApi;
+  }
 }
