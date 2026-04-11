@@ -3,6 +3,10 @@
   "outputDirectory": "dist/worldLab/browser",
   "rewrites": [
     {
+      "source": "/api/countries/(.*)",
+      "destination": "https://restcountries.com/v3.1/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
