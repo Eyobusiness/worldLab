@@ -1,5 +1,4 @@
-import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer } from '@angular/common';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, tap } from 'rxjs';
 import { DonneesMondiale } from '../models/donneesmondiale';
@@ -8,9 +7,8 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class WorldDataService {
   private http = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID);
 
-  private readonly API = this.resolveApiBase();
+  private readonly API = (environment as any).apiUrl || 'https://restcountries.com/v3.1';
 
   // ── ROUTE 1 : Liste/Dashboard (original intact) ───
   private readonly FIELDS =
@@ -169,14 +167,4 @@ export class WorldDataService {
       .slice(0, 8); // On limite à 8 résultats pour l'affichage
   });
 
-  private resolveApiBase(): string {
-    const configuredApi = (environment as any).apiUrl || 'https://restcountries.com/v3.1';
-
-    // En SSR, une URL relative casse les requêtes Node.
-    if (isPlatformServer(this.platformId) && configuredApi.startsWith('/')) {
-      return 'https://restcountries.com/v3.1';
-    }
-
-    return configuredApi;
-  }
 }
