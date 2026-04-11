@@ -23,12 +23,16 @@ export class ThemeService {
       this.isDark.set(saved ? saved === 'dark' : true);
     }
 
-    // Synchronise theme + localStorage + classe HTML
+    // Synchronise theme + localStorage + classe HTML + barre d’adresse mobile
     effect(() => {
       const dark = this.isDark();
       if (this.isBrowser) {
         localStorage.setItem('theme', dark ? 'dark' : 'light');
         document.documentElement.classList.toggle('dark', dark);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute('content', dark ? '#0b1120' : '#f9fafb');
+        }
       }
     });
 

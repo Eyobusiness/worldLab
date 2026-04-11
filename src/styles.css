@@ -1,3 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* Fond / texte par défaut (mobile + avant hydration) — aligné sur le thème sombre du bureau */
+html {
+  color-scheme: dark;
+  min-height: 100%;
+  background-color: #0b1120;
+  color: #f9fafb;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: #0b1120;
+  color: #f9fafb;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mode clair (ThemeService retire la classe .dark sur <html>) */
+html:not(.dark) {
+  color-scheme: light;
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+html:not(.dark) body {
+  background-color: #f9fafb;
+  color: #111827;
+}

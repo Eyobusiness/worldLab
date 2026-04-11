@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512px" height="512px" viewBox="0 0 512 512"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><title>WorldLab Explorer Logo</title><defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="goldGradient">
+            <stop stop-color="#F0A500" offset="0%"></stop>
+            <stop stop-color="#C47D00" offset="100%"></stop>
+        </linearGradient>
+    </defs><rect fill="#0D1B2A" x="0" y="0" width="512" height="512" rx="64"></rect><g transform="translate(156.000000, 100.000000)">
+        <circle fill="url(#goldGradient)" cx="100" cy="100" r="100" opacity="0.9"></circle>
+        <path d="M200,100 C200,155.228475 155.228475,200 100,200 C44.771525,200 0,155.228475 0,100 C0,44.771525 44.771525,0 100,0 C155.228475,0 200,44.771525 200,100 Z M100,175 C141.421356,175 175,141.421356 175,100 C175,58.5786438 141.421356,25 100,25 C58.5786438,25 25,58.5786438 25,100 C25,141.421356 58.5786438,175 100,175 Z" fill="#0D1B2A" transform="translate(100.000000, 100.000000) rotate(-45.000000) translate(-100.000000, -100.000000)"></path>
+    </g><text font-family="Verdana, sans-serif" font-size="64" font-weight="black" letter-spacing="0.1em" fill="url(#goldGradient)" x="256" y="380" text-anchor="middle">
+        WORLDLAB
+    </text><text font-family="Verdana, sans-serif" font-size="24" font-weight="medium" letter-spacing="0.4em" fill="#FFFFFF" opacity="0.4" x="256" y="430" text-anchor="middle">
+        EXPLORER
+    </text></svg>
