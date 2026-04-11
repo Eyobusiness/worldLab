@@ -1,8 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, of, tap, forkJoin, map } from 'rxjs';
 import { DonneesMondiale } from '../models/donneesmondiale';
-import { environment } from '../../../environments/environment';
 
 /** Même principe que AuthService : URL HTTPS absolue, pas de chemin relatif ni proxy. */
 const REST_COUNTRIES_API = 'https://restcountries.com/v3.1';
@@ -13,12 +12,13 @@ export class WorldDataService {
 
   private readonly API = REST_COUNTRIES_API;
 
-  // ── ROUTE 1 : Liste/Dashboard (original intact) ───
-  private readonly FIELDS =
-    (environment as any).fields ||
-    'name,cca2,cca3,population,area,region,languages,currencies,flags,capital';
+  /** Rest Countries : max 10 champs par requête `fields` → liste = 2 appels fusionnés par cca3. */
+  private readonly FIELDS_LIST_A =
+    'name,cca2,cca3,population,area,region,subregion,flags,capital';
 
-  // ── ROUTE 2 : Carte (8 fields, séparée) ──────────
+  private readonly FIELDS_LIST_B = 'cca3,languages,currencies,latlng,capitalInfo';
+
+  // ── Carte : ≤ 10 champs, requête séparée ──────────
   private readonly FIELDS_MAP = 'name,cca2,population,region,flags,capital,latlng,capitalInfo';
 
   // ── Signals ───────────────────────────────────────
@@ -76,12 +76,16 @@ export class WorldDataService {
 
   // ─── MÉTHODES HTTP ──────────────────────────────────────────
 
-  // ROUTE 1 — original intact
+  // ROUTE 1 — deux GET /all (limite 10 champs) puis fusion
   loadAll(): Observable<DonneesMondiale[]> {
     if (this.pays().length > 0) return of(this.pays());
     this.loading.set(true);
 
-    return this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS}`).pipe(
+    return forkJoin({
+      a: this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS_LIST_A}`),
+      b: this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS_LIST_B}`),
+    }).pipe(
+      map(({ a, b }) => this.mergePaysByCca3(a, b)),
       tap((data) => {
         this.pays.set(data);
         this.loading.set(false);
@@ -111,9 +115,7 @@ export class WorldDataService {
     );
   }
 
-  // ROUTE 3 — détail d'un pays
-  // ← On appelle TOUJOURS l'API pour avoir langues, monnaies, frontières...
-  // On ne prend PAS le cache pays() car il n'a pas tous les champs
+  // ROUTE 3 — détail : pas de `fields` → réponse complète (frontières, etc.)
   getPaysByCode(code: string): Observable<DonneesMondiale | null> {
     return this.http.get<DonneesMondiale[]>(`${this.API}/alpha/${code}`).pipe(
       // L'API retourne un tableau même pour un seul pays
@@ -170,4 +172,11 @@ export class WorldDataService {
       .slice(0, 8); // On limite à 8 résultats pour l'affichage
   });
 
+  private mergePaysByCca3(primary: DonneesMondiale[], extra: DonneesMondiale[]): DonneesMondiale[] {
+    const byCca3 = new Map(extra.map((p) => [p.cca3, p]));
+    return primary.map((p) => {
+      const add = byCca3.get(p.cca3);
+      return add ? ({ ...p, ...add } as DonneesMondiale) : p;
+    });
+  }
 }
