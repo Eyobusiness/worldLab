@@ -1,7 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://restcountries.com/v3.1',
-  // latlng et capitalInfo ajoutés pour la carte
+  // latlng et capitalInfo ajoutés pour la carte (l’URL API pays est fixe dans WorldDataService)
   fields:
     'name,cca2,cca3,population,area,region,subregion,languages,currencies,flags,capital,latlng,capitalInfo',
 };

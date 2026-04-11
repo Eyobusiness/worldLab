@@ -4,11 +4,14 @@ import { Observable, catchError, of, tap } from 'rxjs';
 import { DonneesMondiale } from '../models/donneesmondiale';
 import { environment } from '../../../environments/environment';
 
+/** Même principe que AuthService : URL HTTPS absolue, pas de chemin relatif ni proxy. */
+const REST_COUNTRIES_API = 'https://restcountries.com/v3.1';
+
 @Injectable({ providedIn: 'root' })
 export class WorldDataService {
   private http = inject(HttpClient);
 
-  private readonly API = (environment as any).apiUrl || 'https://restcountries.com/v3.1';
+  private readonly API = REST_COUNTRIES_API;
 
   // ── ROUTE 1 : Liste/Dashboard (original intact) ───
   private readonly FIELDS =
