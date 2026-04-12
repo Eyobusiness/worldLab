@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   template: `
     @if (visible()) {
       <div
-        class="fixed bottom-0 left-0 right-0 z-[200] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-4 md:left-auto md:right-4 md:max-w-sm md:p-0 md:pb-4"
+        class="fixed bottom-0 left-0 right-0 z-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-4 md:left-auto md:right-4 md:max-w-sm md:p-0 md:pb-4"
         role="dialog"
         aria-label="Installer l’application"
       >
