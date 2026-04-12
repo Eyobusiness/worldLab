@@ -27,7 +27,10 @@ import { CommonModule } from '@angular/common';
         }"
       >
         <!-- Contenu des pages -->
-        <main class="flex-1 p-4 md:p-6 custom-scrollbar overflow-y-auto">
+        <main
+          class="flex-1 p-4 md:p-6 custom-scrollbar overflow-y-auto "
+          style="background-color: #0b1120"
+        >
           <router-outlet></router-outlet>
         </main>
 
