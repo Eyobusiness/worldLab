@@ -45,12 +45,12 @@
             @let pays = tousPays().find(p => p.cca3 === code);
             @if (pays) {
               <!-- ✅ FIX 2 — Fond teinté par couleur, texte blanc garanti -->
-              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/20"
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/20" 
                    [style.background]="couleurPays(i) + '28'">
-                <img [src]="pays.flags.svg"
+                <img [src]="pays.flags.svg" alt=" dreapeau"
                      class="w-4 h-3 shrink-0 object-cover rounded-sm"
                      [alt]="pays.name.common">
-                <span class="text-white font-semibold text-sm truncate max-w-[7.5rem] sm:max-w-none">
+                <span class="text-white font-semibold text-sm truncate max-w-30 sm:max-w-none" >
                   {{ pays.name.common }}
                 </span>
                 <button (click)="togglePays(code)"
@@ -86,7 +86,7 @@
 
       <!-- Liste pays -->
       <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-        <div class="max-h-[26rem] overflow-y-auto custom-scroll">
+        <div class="max-h-104 overflow-y-auto custom-scroll">
 
           @if (ws.loading()) {
             <div class="flex items-center justify-center py-12">
@@ -125,7 +125,7 @@
                 </div>
 
                 <img [src]="p.flags.svg"
-                     class="w-7 h-[18px] object-cover rounded-sm shadow shrink-0"
+                     class="w-7 h-4.5 object-cover rounded-sm shadow shrink-0"
                      alt="">
 
                 <!-- ✅ FIX 4 — Texte pays TOUJOURS blanc sur mobile et desktop -->
@@ -232,7 +232,7 @@
                       <div class="flex items-center gap-2">
                         <div class="w-2.5 h-2.5 rounded-full shrink-0"
                              [style.background]="couleurPays(i)"></div>
-                        <span class="truncate max-w-[5.5rem]"
+                        <span class="truncate max-w-"
                               [style.color]="couleurPays(i)">
                           {{ p.name.common }}
                         </span>
