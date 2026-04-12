@@ -29,13 +29,11 @@
       <!-- Compteur sélection -->
       <div class="flex items-center justify-between">
         <span class="text-white/60 text-sm font-medium">Pays sélectionnés</span>
-        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-              [class.bg-\[\#f0a500\]]="codesSelectionnes().length >= 2"
-              [class.text-orange]="codesSelectionnes().length >= 2"
-              [class.bg-white\/10]="codesSelectionnes().length < 2"
-              [class.text-orange\/50]="codesSelectionnes().length < 2">
-          {{ codesSelectionnes().length }} / 10
-        </span>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors duration-200"
+      [class.bg-[#f0a500]]="codesSelectionnes().length >= 2"
+      [class.bg-white/10]="codesSelectionnes().length < 2"
+      class="text-white"> {{ codesSelectionnes().length }} / 10
+</span>
       </div>
 
       <!-- Pills des pays sélectionnés -->
@@ -225,22 +223,25 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-white/5">
-                @for (c of criteresActifs(); track c.key) {
-                  <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-4 py-3 text-white/50 text-xs font-medium">{{ c.label }}</td>
-                    @for (p of paysCompares(); track p.cca3; let i = $index) {
-                      <td class="px-4 py-3 text-sm font-semibold"
-                          [class.text-\[\#f0a500\]]="estLeader(p, c)"
-                          [class.text-white\/70]="!estLeader(p, c)">
-                        {{ c.format(p) }}
-                        @if (estLeader(p, c)) {
-                          <span class="ml-1 text-[9px]">🏆</span>
-                        }
-                      </td>
-                    }
-                  </tr>
-                }
-              </tbody>
+                  @for (c of criteresActifs(); track c.key) {
+                    <tr class="hover:bg-white/5 transition-colors">
+                      <td class="px-4 py-3 text-white/50 text-xs font-medium">{{ c.label }}</td>
+                      
+                      @for (p of paysCompares(); track p.cca3; let i = $index) {
+                        <td class="px-4 py-3 text-sm font-bold transition-all"
+                            [class.text-[#f0a500]]="estLeader(p, c)"
+                            [class.text-white]="!estLeader(p, c)">
+                          
+                          {{ c.format(p) }}
+
+                          @if (estLeader(p, c)) {
+                            <span class="ml-1 text-[10px] drop-shadow-[0_0_5px_rgba(240,165,0,0.5)]">🏆</span>
+                          }
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
             </table>
           </div>
         </div>
