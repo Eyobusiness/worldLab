@@ -1,25 +1,12 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap, forkJoin, map } from 'rxjs';
+import { Observable, catchError, of, tap, map } from 'rxjs';
 import { DonneesMondiale } from '../models/donneesmondiale';
-
-/** Même principe que AuthService : URL HTTPS absolue, pas de chemin relatif ni proxy. */
-const REST_COUNTRIES_API = 'https://restcountries.com/v3.1';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class WorldDataService {
   private http = inject(HttpClient);
-
-  private readonly API = REST_COUNTRIES_API;
-
-  /** Rest Countries : max 10 champs par requête `fields` → liste = 2 appels fusionnés par cca3. */
-  private readonly FIELDS_LIST_A =
-    'name,cca2,cca3,population,area,region,subregion,flags,capital';
-
-  private readonly FIELDS_LIST_B = 'cca3,languages,currencies,latlng,capitalInfo';
-
-  // ── Carte : ≤ 10 champs, requête séparée ──────────
-  private readonly FIELDS_MAP = 'name,cca2,population,region,flags,capital,latlng,capitalInfo';
 
   // ── Signals ───────────────────────────────────────
   pays = signal<DonneesMondiale[]>([]);
@@ -76,21 +63,28 @@ export class WorldDataService {
 
   // ─── MÉTHODES HTTP ──────────────────────────────────────────
 
-  // ROUTE 1 — deux GET /all (limite 10 champs) puis fusion
+  // ROUTE 1 — chargement complet de tous les pays
   loadAll(): Observable<DonneesMondiale[]> {
     if (this.pays().length > 0) return of(this.pays());
     this.loading.set(true);
 
-    return forkJoin({
-      a: this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS_LIST_A}`),
-      b: this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS_LIST_B}`),
-    }).pipe(
-      map(({ a, b }) => this.mergePaysByCca3(a, b)),
+    // Charge en priorité le fichier local /data/countries.json (ultra rapide, hors-ligne),
+    // avec repli automatique sur le miroir officiel en ligne (GitLab) en cas de besoin
+    const source$ = this.http.get<DonneesMondiale[]>(environment.localCountriesUrl).pipe(
+      catchError(() => this.http.get<DonneesMondiale[]>(environment.countriesApiUrl)),
+    );
+
+    return source$.pipe(
       tap((data) => {
         this.pays.set(data);
+        if (this.paysMap().length === 0) {
+          this.paysMap.set(data);
+        }
         this.loading.set(false);
+        this.error.set(null);
       }),
-      catchError(() => {
+      catchError((err) => {
+        console.error('Erreur chargement pays:', err);
         this.error.set('Erreur de connexion API.');
         this.loading.set(false);
         return of([]);
@@ -98,15 +92,20 @@ export class WorldDataService {
     );
   }
 
-  // ROUTE 2 — carte uniquement
+  // ROUTE 2 — données pour la carte
   loadMapData(): Observable<DonneesMondiale[]> {
     if (this.paysMap().length > 0) return of(this.paysMap());
-    this.loadingMap.set(true);
+    if (this.pays().length > 0) {
+      this.paysMap.set(this.pays());
+      return of(this.paysMap());
+    }
 
-    return this.http.get<DonneesMondiale[]>(`${this.API}/all?fields=${this.FIELDS_MAP}`).pipe(
-      tap((data) => {
+    this.loadingMap.set(true);
+    return this.loadAll().pipe(
+      map((data) => {
         this.paysMap.set(data);
         this.loadingMap.set(false);
+        return data;
       }),
       catchError(() => {
         this.loadingMap.set(false);
@@ -115,17 +114,38 @@ export class WorldDataService {
     );
   }
 
-  // ROUTE 3 — détail : pas de `fields` → réponse complète (frontières, etc.)
+  // ROUTE 3 — détail par code cca2 ou cca3
   getPaysByCode(code: string): Observable<DonneesMondiale | null> {
-    return this.http.get<DonneesMondiale[]>(`${this.API}/alpha/${code}`).pipe(
-      // L'API retourne un tableau même pour un seul pays
-      tap(() => {}),
+    const cleanCode = code?.trim().toLowerCase();
+    if (!cleanCode) return of(null);
+
+    if (this.pays().length > 0) {
+      const found =
+        this.pays().find(
+          (p) =>
+            p.cca3?.toLowerCase() === cleanCode ||
+            p.cca2?.toLowerCase() === cleanCode,
+        ) ?? null;
+      return of(found);
+    }
+
+    return this.loadAll().pipe(
+      map((list) => {
+        return (
+          list.find(
+            (p) =>
+              p.cca3?.toLowerCase() === cleanCode ||
+              p.cca2?.toLowerCase() === cleanCode,
+          ) ?? null
+        );
+      }),
       catchError(() => {
         this.error.set('Impossible de trouver les détails de ce pays.');
         return of(null);
       }),
-    ) as Observable<DonneesMondiale | null>;
+    );
   }
+
 
   // ─── HELPERS ────────────────────────────────────────────────
   searchByName(q: string) {

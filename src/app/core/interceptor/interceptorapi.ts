@@ -1,12 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const Interceptorapi: HttpInterceptorFn = (req, next) => {
-  // On cible uniquement les appels vers REST Countries
-  if (req.url.includes('restcountries.com')) {
+  // On cible les appels vers les données pays (REST Countries, GitLab, assets locaux)
+  if (
+    req.url.includes('restcountries.com') ||
+    req.url.includes('gitlab.com') ||
+    req.url.includes('countries.json')
+  ) {
     const apiReq = req.clone({
-      // On force les headers à vide pour éviter l'erreur 400
-      setHeaders: {},
-      // Optionnel: on s'assure qu'aucun header par défaut (comme Content-Type) ne passe
       headers: req.headers.delete('Content-Type'),
     });
     return next(apiReq);
